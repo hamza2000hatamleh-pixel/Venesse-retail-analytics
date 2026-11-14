@@ -1,0 +1,81 @@
+table DimPaymentMethod
+	lineageTag: 86309a27-0373-4d8c-9fa9-42c37bb3d6bf
+
+	measure 'PY Gross Profit Check' =
+			
+			CALCULATE(
+			    [Gross Profit (Jan-Sep)],
+			    DATEADD(DimDate[full_date], -1, YEAR)
+			)
+		lineageTag: 9b17b5e1-e60c-4218-ba0b-fa1c31622a18
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'PY Expenses Check' =
+			
+			CALCULATE(
+			    [Operating Expenses (Jan-Sep)],
+			    DATEADD(DimDate[full_date], -1, YEAR)
+			)
+		lineageTag: 70f2b293-252b-4398-b79f-155703d74f04
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'PY Campaign Costs Check' =
+			
+			CALCULATE(
+			    [Campaign Costs (Jan-Sep)],
+			    DATEADD(DimDate[full_date], -1, YEAR)
+			)
+		lineageTag: 8c4741da-f6e9-4c72-8a2e-a452ddb3a7c0
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'PY Campaign Costs SQL Check' =
+			var selectYear = SELECTEDVALUE(DimDate[year])
+			VAR StartDate = DATE(selectYear, 1, 1)
+			VAR EndDate = DATE(selectYear, 9, 30)
+			RETURN
+			CALCULATE(
+			    SUM(FactCampaignPerformance[campaign_cost]),
+			    REMOVEFILTERS(DimDate),
+			    FILTER(
+			        ALL(DimMarketingCampaign),
+			        DimMarketingCampaign[campaign_start_date] >= StartDate
+			            && DimMarketingCampaign[campaign_start_date] <= EndDate
+			    )
+			)
+		lineageTag: 9901df4d-4937-4763-ac74-abb34cbf24b1
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column payment_method_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 00f5fdc9-c17b-434a-85dc-cb713f919b39
+		summarizeBy: none
+		sourceColumn: payment_method_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column payment_method
+		dataType: string
+		lineageTag: 1a5fe058-2899-4873-a0c9-bd2140f2d283
+		summarizeBy: none
+		sourceColumn: payment_method
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DimPaymentMethod = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("(local)", "Venesse"),
+				    dbo_DimPaymentMethod = Source{[Schema="dbo",Item="DimPaymentMethod"]}[Data]
+				in
+				    dbo_DimPaymentMethod
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

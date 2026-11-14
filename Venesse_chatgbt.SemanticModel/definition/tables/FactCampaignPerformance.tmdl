@@ -1,0 +1,158 @@
+table FactCampaignPerformance
+	lineageTag: fd09b868-a65d-4f49-9376-278da27da4c2
+
+	measure 'Total Marketing Spending' =
+			
+			VAR SelectedYear = SELECTEDVALUE(DimDate[year])
+			VAR StartDate = DATE(SelectedYear, 1, 1)
+			VAR EndDate = DATE(SelectedYear, 9, 30)
+			RETURN
+			IF(
+			    NOT ISBLANK(SelectedYear),
+			    CALCULATE(
+			        SUM(FactCampaignPerformance[campaign_cost]),
+			        DATESBETWEEN(
+			            DimMarketingCampaign[campaign_start_date],
+			            StartDate,
+			            EndDate
+			        ),
+			        DATESBETWEEN(
+			            DimMarketingCampaign[campaign_end_date],
+			            StartDate,
+			            EndDate
+			        )
+			    )
+			)
+		formatString: \$#,0.000;(\$#,0.000);\$#,0.000
+		lineageTag: 7671e6ef-cfdd-4bcf-9c0c-b1472948d57a
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Campaign-Attributed Revenue' =
+			
+			VAR SelectedYear =
+			    SELECTEDVALUE(DimDate[year])
+			
+			VAR StartDate =
+			    DATE(SelectedYear, 1, 1)
+			
+			VAR EndDate =
+			    DATE(SelectedYear, 9, 30)
+			
+			VAR EligibleCampaigns =
+			    CALCULATETABLE(
+			        VALUES(DimMarketingCampaign[campaign_id]),
+			        DimMarketingCampaign[campaign_start_date] >= StartDate,
+			        DimMarketingCampaign[campaign_end_date] <= EndDate
+			    )
+			
+			RETURN
+			IF(
+			    NOT ISBLANK(SelectedYear),
+			    CALCULATE(
+			        [Total Net Revenue],
+			        DATESBETWEEN(
+			            DimDate[full_date],
+			            StartDate,
+			            EndDate
+			        ),
+			        TREATAS(
+			            EligibleCampaigns,
+			            FactSales[campaign_id]
+			        )
+			    )
+			)
+		formatString: \$#,0.000;(\$#,0.000);\$#,0.000
+		lineageTag: 72df36e8-50a1-4d06-a855-e47ffe11bc59
+
+	measure ROAS = DIVIDE([Campaign-Attributed Revenue],[Total Marketing Spending])
+		formatString: 0.00
+		lineageTag: 9a0deb9c-c87f-45f9-a638-8ee2833c14af
+
+	measure 'Marketing ROI %' = DIVIDE(([Campaign-Attributed Revenue]-[Total Marketing Spending]-[Campaign-Attributed COGS]),[Total Marketing Spending])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: eac9472d-2168-479b-b4d6-9101b1d0f646
+
+	measure 'Campaign-Attributed COGS' =
+			
+			VAR SelectedYear =
+			    SELECTEDVALUE(DimDate[year])
+			
+			VAR StartDate =
+			    DATE(SelectedYear, 1, 1)
+			
+			VAR EndDate =
+			    DATE(SelectedYear, 9, 30)
+			
+			VAR EligibleCampaigns =
+			    CALCULATETABLE(
+			        VALUES(DimMarketingCampaign[campaign_id]),
+			        DimMarketingCampaign[campaign_start_date] >= StartDate,
+			        DimMarketingCampaign[campaign_end_date] <= EndDate
+			    )
+			
+			RETURN
+			IF(
+			    NOT ISBLANK(SelectedYear),
+			    CALCULATE(
+			        [Total COGS],
+			        DATESBETWEEN(
+			            DimDate[full_date],
+			            StartDate,
+			            EndDate
+			        ),
+			        TREATAS(
+			            EligibleCampaigns,
+			            FactSales[campaign_id]
+			        )
+			    )
+			)
+		lineageTag: 136b8e13-9108-4412-8ab4-d982fb1c0c0a
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Profit After Marketing' = ROUND(FactCampaignPerformance[Campaign-Attributed Revenue]-FactCampaignPerformance[Campaign-Attributed COGS]-[Total Marketing Spending],2)
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 36101768-a7b1-461f-96a0-b3692644becf
+
+	column campaign_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 370247f5-d124-40d9-a9c3-7e124ca72b59
+		summarizeBy: none
+		sourceColumn: campaign_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column campaign_cost
+		dataType: double
+		lineageTag: 3b6aa544-160c-40d3-a9e4-d32b1f4e1df1
+		summarizeBy: sum
+		sourceColumn: campaign_cost
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column num_of_clicks
+		dataType: int64
+		formatString: 0
+		lineageTag: 5e00af60-c504-4950-86d4-ea1e3d6d1c6c
+		summarizeBy: sum
+		sourceColumn: num_of_clicks
+
+		annotation SummarizationSetBy = Automatic
+
+	partition FactCampaignPerformance = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("(local)", "Venesse"),
+				    dbo_FactCampaignPerformance = Source{[Schema="dbo",Item="FactCampaignPerformance"]}[Data]
+				in
+				    dbo_FactCampaignPerformance
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

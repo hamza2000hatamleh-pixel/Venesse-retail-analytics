@@ -1,0 +1,51 @@
+table CustomerSegments
+	lineageTag: 22650453-9c1a-4ae4-8aaf-1a09b2654392
+
+	measure 'Segment Customer Count' =
+			
+			VAR SelectedSegment =
+			    SELECTEDVALUE(CustomerSegments[Segment])
+			
+			RETURN
+			SWITCH(
+			    SelectedSegment,
+			    "One-Time", [One-Time Customer Count],
+			    "Repeat (2–3)", [Repeat Customer(2-3)],
+			    "Loyal (4+)", [Loyal Customer Count]
+			)
+		formatString: 0
+		lineageTag: 4e409814-d572-4532-8a06-ac59be54975b
+
+	column Segment
+		lineageTag: 6910324d-3c76-43f1-9f97-c58d88b172c5
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Segment]
+
+		annotation SummarizationSetBy = Automatic
+
+	column SortOrder
+		formatString: 0
+		lineageTag: 41f62352-494d-46ed-8ff1-a54d1e0e8e6d
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [SortOrder]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition CustomerSegments = calculated
+		mode: import
+		source =
+				
+				DATATABLE(
+				    "Segment", STRING,
+				    "SortOrder", INTEGER,
+				    {
+				        {"One-Time", 1},
+				        {"Repeat (2–3)", 2},
+				        {"Loyal (4+)", 3}
+				    }
+				)
+
+	annotation PBI_Id = cdeec5a048634a7c8c86d56aec27e4bd
+

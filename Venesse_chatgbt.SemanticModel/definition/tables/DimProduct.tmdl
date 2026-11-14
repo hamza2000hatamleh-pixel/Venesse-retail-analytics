@@ -1,0 +1,208 @@
+table DimProduct
+	lineageTag: 23a3c995-67ab-469a-9007-f6b457704b56
+
+	measure 'Product Revenue Contribution %' = DIVIDE([Total Net Revenue],CALCULATE([Total Net Revenue],ALL(DimProduct[product_name])))
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 4afb95eb-12b7-48dd-90e7-0b883c9d30c3
+
+	measure 'May 2026 Revenue Share' = CALCULATE([Product Revenue Contribution %],DimDate[year_month] = "2026-05")
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: dc6d0adf-ac25-4321-b05f-bbaef4cc9fbb
+
+	measure 'June 2026 Revenue Share' = CALCULATE([Product Revenue Contribution %],DimDate[year_month] = "2026-06")
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: c42ebc91-9141-44cc-aa7d-49916624c315
+
+	measure 'May 2026 Gross Profit Margin %' = CALCULATE([Gross Profit Margin %],DimDate[year_month] = "2026-05")
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 4c82f31c-4a65-434c-b1ec-c1c4e92c6c48
+
+	measure 'June 2026 Gross Profit Margin %' = CALCULATE([Gross Profit Margin %],DimDate[year_month] = "2026-06")
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: f0d10c37-305f-488b-b819-b50292c6a9d2
+
+	measure 'May Product Margin Contribution (pp)' = [May 2026 Revenue Share] * [May 2026 Gross Profit Margin %] * 100
+		lineageTag: 873ceae1-f58b-401d-86fc-82ab02e6f167
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'June Product Margin Contribution (pp)' = [June 2026 Gross Profit Margin %] * [June 2026 Revenue Share] * 100
+		lineageTag: 26709d77-31d1-4587-b7dd-0eecfe3a9f7f
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Margin Contribution Change (pp)' = ```
+			[June Product Margin Contribution (pp)] - [May Product Margin Contribution (pp)] 
+			```
+		lineageTag: e699c823-9991-4a9f-9960-5db8383f62ab
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Active Products' =
+			VAR SelectedYear =
+			    SELECTEDVALUE(DimDate[year])
+			
+			VAR StartDate =
+			    DATE(SelectedYear, 1, 1)
+			
+			VAR EndDate =
+			    DATE(SelectedYear, 9, 30)
+			
+			RETURN
+			IF(
+			    NOT ISBLANK(SelectedYear),
+			    CALCULATE(
+			        DISTINCTCOUNT(FactSales[product_id]),
+			        REMOVEFILTERS(DimDate),
+			        DATESBETWEEN(
+			            DimDate[full_date],
+			            StartDate,
+			            EndDate
+			        ),DimOrderStatus[status_name] = "delivered"
+			    )
+			)
+		formatString: 0
+		lineageTag: 1afdae52-a501-4973-b9ad-36588374d311
+
+	measure 'Product GP Contribution %' = DIVIDE([Current Year Gross Profit YTD],CALCULATE([Current Year Gross Profit YTD],REMOVEFILTERS(DimProduct)))
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: bf548048-550b-4297-a3ae-1ed79fce5af2
+
+	measure 'CY Top 10 Products GP' = ```
+			VAR TopProductCount = 10
+			
+			VAR ActiveProducts =
+			    FILTER(
+			        ALL(DimProduct),
+			        [Delivered Order Count] > 0
+			    ) VAR TopProduct = TOPN(TopProductCount,ActiveProducts,[Current Year Gross Profit YTD],DESC)   RETURN SUMX(TopProduct,[Current Year Gross Profit YTD])                                                               
+			```
+		formatString: \$#,0.000;(\$#,0.000);\$#,0.000
+		lineageTag: d74fc123-6ccd-48fd-8d5d-40138686330d
+
+	measure 'CY Top 10 Products GP Contribution' = DIVIDE([CY Top 10 Products GP],CALCULATE([Current Year Gross Profit YTD],REMOVEFILTERS(DimProduct)))
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: dcd40495-1dd4-4279-9600-543ec43c3c4c
+
+	measure 'Units Sold' =
+			VAR SelectedYear =
+			    SELECTEDVALUE(DimDate[year])
+			
+			VAR StartDate =
+			    DATE(SelectedYear, 1, 1)
+			
+			VAR EndDate =
+			    DATE(SelectedYear, 9, 30)
+			
+			RETURN
+			IF(
+			    NOT ISBLANK(SelectedYear),
+			    CALCULATE(
+			        COUNT(FactSales[product_id]),
+			        REMOVEFILTERS(DimDate),
+			        DATESBETWEEN(
+			            DimDate[full_date],
+			            StartDate,
+			            EndDate
+			        )
+			    )
+			)
+		formatString: 0
+		lineageTag: 1b1fe450-0af7-4abf-8c3f-03b445d24d55
+
+	measure 'PY Top 10 Products GP' = ```
+			VAR TopProductCount = 10
+			
+			VAR ActiveProducts =
+			    FILTER(
+			        DimProduct,
+			        [Previous Year Delivered Order Count] > 0
+			    ) VAR TopProduct = TOPN(TopProductCount,ActiveProducts,[Previous Year Gross Profit YTD],DESC)   RETURN SUMX(TopProduct,[Previous Year Gross Profit YTD])      
+			```
+		lineageTag: 07eb78cd-0eed-4de6-997b-caade7de922d
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'PY Top 10 Products GP Contribution' = DIVIDE([PY Top 10 Products GP],CALCULATE([Previous Year Gross Profit YTD],REMOVEFILTERS(DimProduct)))
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 318684b0-af16-4921-804d-031e31fb4347
+
+	measure 'Top 10 Products by YoY Gross Profit Change' = [CY Top 10 Products GP] - [PY Top 10 Products GP]
+		lineageTag: b6229580-c1cb-46bf-88fd-fd3a303a2091
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column product_id
+		dataType: int64
+		formatString: 0
+		lineageTag: fe47f3b9-bd02-4756-ad79-e9c3d996a6af
+		summarizeBy: none
+		sourceColumn: product_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column product_name
+		dataType: string
+		lineageTag: 7f09bbda-0517-47d5-b030-c7f57cc7407b
+		summarizeBy: none
+		sourceColumn: product_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_name
+		dataType: string
+		lineageTag: 6bc326dd-e1d1-4358-8fab-ec113bb01b7f
+		summarizeBy: none
+		sourceColumn: category_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column unit_cost
+		dataType: double
+		lineageTag: 1533460c-c5a8-4bb6-be85-27838289ab8f
+		summarizeBy: none
+		sourceColumn: unit_cost
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column unit_price
+		dataType: double
+		lineageTag: c70850b4-aa26-4766-8466-444de3c668be
+		summarizeBy: none
+		sourceColumn: unit_price
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column color
+		dataType: string
+		lineageTag: 029b33aa-8a2a-459d-bbc7-f0c1e2bee8c8
+		summarizeBy: none
+		sourceColumn: color
+
+		annotation SummarizationSetBy = Automatic
+
+	column size
+		dataType: string
+		lineageTag: c92e45f1-14d9-438e-853f-94307ffa1bff
+		summarizeBy: none
+		sourceColumn: size
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DimProduct = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("(local)", "Venesse"),
+				    dbo_DimProduct = Source{[Schema="dbo",Item="DimProduct"]}[Data]
+				in
+				    dbo_DimProduct
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

@@ -1,0 +1,274 @@
+table FactSales
+	lineageTag: 4ed7021e-dcbe-4af4-b343-9573ff40cff6
+
+	measure 'Total COGS' = CALCULATE(sum(FactSales[cogs]),FILTER(DimOrderStatus,DimOrderStatus[status_name] = "delivered"))
+		lineageTag: 202c22ca-b10a-4882-adae-23f230ae257b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Net Revenue' = CALCULATE(sum(FactSales[net_revenue]),FILTER(DimOrderStatus,DimOrderStatus[status_name] = "delivered"))
+		lineageTag: ea0c64bf-93e2-42b3-bea2-bec58f0f793c
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Gross Profit' = [Total Net Revenue] - [Total COGS]
+		lineageTag: bb771abe-c307-4de7-b074-a25067c8917d
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Gross Profit Margin %' = DIVIDE([Gross Profit], [Total Net Revenue])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 18da9a27-1440-48e0-8b4d-778f647a69e8
+
+	measure 'Previous Year Revenue' =
+			var SelectedYear = SELECTEDVALUE(DimDate[year]) var PreviousYear_ = selectedyear - 1 VAR StartDate = DATE(PreviousYear_,1,1) var EndDate = DATE(PreviousYear_,9,30) RETURN if(NOT ISBLANK(SelectedYear),
+			CALCULATE(
+			    [Total Net Revenue],
+			    REMOVEFILTERS(DimDate),DATESBETWEEN(DimDate[full_date],StartDate,EndDate)
+			))
+		formatString: \$#,0.000;(\$#,0.000);\$#,0.000
+		lineageTag: 14e2973b-f9b2-4249-9356-52ca6f956f3e
+
+	measure 'Current Year Revenue' =
+			
+			VAR SelectedYear =
+			    SELECTEDVALUE(DimDate[year])
+			
+			VAR StartDate =
+			    DATE(SelectedYear, 1, 1)
+			
+			VAR EndDate =
+			    DATE(SelectedYear, 9, 30)
+			
+			RETURN
+			IF(
+			    NOT ISBLANK(SelectedYear),
+			    CALCULATE(
+			        [Total Net Revenue],
+			        REMOVEFILTERS(DimDate),
+			        DATESBETWEEN(
+			            DimDate[full_date],
+			            StartDate,
+			            EndDate
+			        )
+			    )
+			)
+		formatString: \$#,0.000;(\$#,0.000);\$#,0.000
+		lineageTag: fc52b6e8-5d15-4310-b91a-a1da31b0755a
+
+	measure 'Revenue YoY Change' = [Current Year Revenue] - [Previous Year Revenue]
+		lineageTag: 6e19437d-4eb7-4c01-a636-712447fbf58a
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Revenue YoY Growth %' = DIVIDE([Revenue YoY Change], [Previous Year Revenue])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: f4fa296a-762f-4cdb-a4a6-811b05470abb
+
+	measure 'Previous Year Gross Profit YTD' = [Previous Year Revenue] - [Previous Year COGS]
+		formatString: \$#,0.000;(\$#,0.000);\$#,0.000
+		lineageTag: 3948cf5c-9823-41e8-817b-f1fb09754d90
+
+	measure 'Current Year Gross Profit YTD' = [Current Year Revenue] - [Current Year COGS]
+		formatString: \$#,0.000;(\$#,0.000);\$#,0.000
+		lineageTag: 80e5507e-2c55-45e4-be1f-9cee02fbbe8f
+
+	measure 'Current Year COGS' =
+			
+			VAR SelectedYear =
+			    SELECTEDVALUE(DimDate[year])
+			
+			VAR StartDate =
+			    DATE(SelectedYear, 1, 1)
+			
+			VAR EndDate =
+			    DATE(SelectedYear, 9, 30)
+			
+			RETURN
+			IF(
+			    NOT ISBLANK(SelectedYear),
+			    CALCULATE(
+			        [Total COGS],
+			        REMOVEFILTERS(DimDate),
+			        DATESBETWEEN(
+			            DimDate[full_date],
+			            StartDate,
+			            EndDate
+			        )
+			    )
+			)
+		lineageTag: e9c9040b-db73-4804-a2b1-2e51de2dbc18
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Gross Profit YoY Growth %' = DIVIDE([Current Year Gross Profit YTD] - [Previous Year Gross Profit YTD], [Previous Year Gross Profit YTD])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 0b73307a-4546-47cd-a7d2-13bfcb3e1a5d
+
+	measure 'Current Year Profit Margin %' = DIVIDE([Current Year Gross Profit YTD],[Current Year Revenue])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: d760e2ac-537d-4fcc-9094-22654ef17aa8
+
+	measure 'Previous Year Profit Margin %' = DIVIDE([Previous Year Gross Profit YTD],[Previous Year Revenue])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 4e470d28-84fa-4210-a0e7-5003d88a78cc
+
+	measure 'Gross Profit Margin YoY Change (pp)' = ([Current Year Profit Margin %] - [Previous Year Profit Margin %] ) *100
+		lineageTag: 2d222e15-8463-49d5-81eb-b38ff032520a
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Previous Year COGS' =
+			var SelectedYear = SELECTEDVALUE(DimDate[year]) var PreviousYear_ = selectedyear - 1 VAR StartDate = DATE(PreviousYear_,1,1) var EndDate = DATE(PreviousYear_,9,30) RETURN if(NOT ISBLANK(SelectedYear),
+			CALCULATE(
+			    [Total COGS],
+			    REMOVEFILTERS(DimDate),DATESBETWEEN(DimDate[full_date],StartDate,EndDate)
+			))
+		lineageTag: 4f29d075-a852-4ce3-8d87-0ed12ef9591f
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column order_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 795346e6-a4ef-4fd6-a827-39eedbe9bb7a
+		summarizeBy: none
+		sourceColumn: order_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column customer_id
+		dataType: int64
+		formatString: 0
+		lineageTag: cd53ec53-c24c-4aa6-b817-aac6cbd6f5da
+		summarizeBy: none
+		sourceColumn: customer_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column product_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 42062f70-6764-422b-9743-6173bf1fbda1
+		summarizeBy: none
+		sourceColumn: product_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column campaign_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 78c35f27-2159-445c-8794-3d4ac31c5f98
+		summarizeBy: none
+		sourceColumn: campaign_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column order_date_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 1f58606c-daf1-4c34-b73f-dbbe83724eb2
+		summarizeBy: none
+		sourceColumn: order_date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column ship_date_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 103f8a09-0781-449b-84c1-a7bd5be5cca3
+		summarizeBy: sum
+		sourceColumn: ship_date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column status_id
+		dataType: int64
+		formatString: 0
+		lineageTag: fdd86e50-238b-4b98-a216-a4c15dc422b9
+		summarizeBy: none
+		sourceColumn: status_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column payment_method_key
+		dataType: int64
+		formatString: 0
+		lineageTag: ad1f453f-644d-4d8e-b84b-32461fe279a9
+		summarizeBy: none
+		sourceColumn: payment_method_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column quantity
+		dataType: int64
+		formatString: 0
+		lineageTag: 6c45a4a4-f2c0-427b-997a-a7fa928a0ff3
+		summarizeBy: sum
+		sourceColumn: quantity
+
+		annotation SummarizationSetBy = Automatic
+
+	column gross_revenue
+		dataType: double
+		lineageTag: acc20bcc-ae51-4a4e-8c92-e8d1e2a4dbfe
+		summarizeBy: sum
+		sourceColumn: gross_revenue
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column item_discount_amount
+		dataType: double
+		lineageTag: 1d219653-f611-4292-b7ed-6a5763151a12
+		summarizeBy: sum
+		sourceColumn: item_discount_amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column order_discount_amount
+		dataType: double
+		lineageTag: 7ec2f31e-767f-4176-bf1b-56c1c4785157
+		summarizeBy: sum
+		sourceColumn: order_discount_amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column net_revenue
+		dataType: double
+		lineageTag: 79b69ccf-eb36-4ac1-a312-9f504e5a805d
+		summarizeBy: sum
+		sourceColumn: net_revenue
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column cogs
+		dataType: double
+		lineageTag: a7c57e34-0543-4171-93b1-b75fb7829baf
+		summarizeBy: sum
+		sourceColumn: cogs
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition FactSales = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("(local)", "Venesse"),
+				    dbo_FactSales = Source{[Schema="dbo",Item="FactSales"]}[Data]
+				in
+				    dbo_FactSales
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

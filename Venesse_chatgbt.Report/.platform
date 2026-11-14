@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "Venesse_chatgbt"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "5fe94a7f-45c7-41ca-a068-e87f3fe4345c"
+  }
+}

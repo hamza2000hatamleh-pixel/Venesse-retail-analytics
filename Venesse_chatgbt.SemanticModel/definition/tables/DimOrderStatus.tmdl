@@ -1,0 +1,33 @@
+table DimOrderStatus
+	lineageTag: e459d543-207d-4f21-b7e2-cff4285a5866
+
+	column status_id
+		dataType: int64
+		formatString: 0
+		lineageTag: b85495d0-decf-4244-9514-f6223a1c6693
+		summarizeBy: none
+		sourceColumn: status_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column status_name
+		dataType: string
+		lineageTag: 4857ddf5-ff69-457c-8147-3cdef3803725
+		summarizeBy: none
+		sourceColumn: status_name
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DimOrderStatus = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("(local)", "Venesse"),
+				    dbo_DimOrderStatus = Source{[Schema="dbo",Item="DimOrderStatus"]}[Data]
+				in
+				    dbo_DimOrderStatus
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

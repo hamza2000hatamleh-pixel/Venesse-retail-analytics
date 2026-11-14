@@ -1,0 +1,33 @@
+table DimExpenseCategory
+	lineageTag: 860b8662-9d7b-4e83-acc9-cd50c10e35e3
+
+	column expense_category_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 774fb804-dafe-4949-b1cd-06714491e045
+		summarizeBy: none
+		sourceColumn: expense_category_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column expense_category_name
+		dataType: string
+		lineageTag: 2b857c89-4c61-4268-8878-4baa0641bfd5
+		summarizeBy: none
+		sourceColumn: expense_category_name
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DimExpenseCategory = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("(local)", "Venesse"),
+				    dbo_DimExpenseCategory = Source{[Schema="dbo",Item="DimExpenseCategory"]}[Data]
+				in
+				    dbo_DimExpenseCategory
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

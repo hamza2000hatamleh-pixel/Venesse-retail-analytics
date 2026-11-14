@@ -1,0 +1,136 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "name": "70fc07e804445c3a5be5",
+  "position": {
+    "x": 10,
+    "y": 0,
+    "z": 0,
+    "height": 280,
+    "width": 755,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactExpenses"
+                    }
+                  },
+                  "Property": "Gross Profit (Jan-Sep)"
+                }
+              },
+              "queryRef": "FactExpenses.Gross Profit (Jan-Sep)",
+              "nativeQueryRef": "Gross Profit (Jan-Sep)"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactExpenses"
+                    }
+                  },
+                  "Property": "Operating Expenses (Jan-Sep)"
+                }
+              },
+              "queryRef": "FactExpenses.Operating Expenses (Jan-Sep)",
+              "nativeQueryRef": "Operating Expenses (Jan-Sep)"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactExpenses"
+                    }
+                  },
+                  "Property": "Campaign Costs (Jan-Sep)"
+                }
+              },
+              "queryRef": "FactExpenses.Campaign Costs (Jan-Sep)",
+              "nativeQueryRef": "Campaign Costs (Jan-Sep)"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactExpenses"
+                    }
+                  },
+                  "Property": "PY Operating Profit (Jan-Sep)"
+                }
+              },
+              "queryRef": "FactExpenses.PY Operating Profit (Jan-Sep)",
+              "nativeQueryRef": "PY Operating Profit (Jan-Sep)"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "DimPaymentMethod"
+                    }
+                  },
+                  "Property": "PY Campaign Costs Check"
+                }
+              },
+              "queryRef": "DimPaymentMethod.PY Campaign Costs Check",
+              "nativeQueryRef": "PY Campaign Costs Check"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "DimPaymentMethod"
+                    }
+                  },
+                  "Property": "PY Expenses Check"
+                }
+              },
+              "queryRef": "DimPaymentMethod.PY Expenses Check",
+              "nativeQueryRef": "PY Expenses Check"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "DimPaymentMethod"
+                    }
+                  },
+                  "Property": "PY Gross Profit Check"
+                }
+              },
+              "queryRef": "DimPaymentMethod.PY Gross Profit Check",
+              "nativeQueryRef": "PY Gross Profit Check"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "DimPaymentMethod"
+                    }
+                  },
+                  "Property": "PY Campaign Costs SQL Check"
+                }
+              },
+              "queryRef": "DimPaymentMethod.PY Campaign Costs SQL Check",
+              "nativeQueryRef": "PY Campaign Costs SQL Check"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

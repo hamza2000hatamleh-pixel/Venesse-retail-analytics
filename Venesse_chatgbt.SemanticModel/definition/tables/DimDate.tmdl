@@ -1,0 +1,154 @@
+table DimDate
+	lineageTag: ee3068c3-b151-4dd2-b8de-ce67ee3b0f1f
+	dataCategory: Time
+
+	measure 'Last Sales Date' =
+			
+			var SelectedYear = SELECTEDVALUE(DimDate[year]) var StartDate = DATE(SelectedYear,1,1) var EndDate = DATE(SelectedYear,9,30) RETURN IF(
+			    NOT ISBLANK(SelectedYear),CALCULATE([Total Net Revenue],REMOVEFILTERS(DimDate),DATESBETWEEN(DimDate[full_date],StartDate,EndDate)) )
+		lineageTag: 54af1133-b45b-4ccb-918d-f20b195cf950
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column date_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 3c3cc0e5-42d6-429a-abfc-495226423fbe
+		summarizeBy: none
+		sourceColumn: date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column full_date
+		dataType: dateTime
+		isKey
+		formatString: Long Date
+		lineageTag: 8906627a-b943-4c13-a74f-5d040a62d909
+		summarizeBy: none
+		sourceColumn: full_date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column year
+		dataType: int64
+		formatString: 0
+		lineageTag: 175fbc55-36da-4440-a414-b5f9a4b79795
+		summarizeBy: none
+		sourceColumn: year
+
+		annotation SummarizationSetBy = User
+
+	column quarter
+		dataType: int64
+		formatString: 0
+		lineageTag: b3249836-bf56-4e66-b3ef-2cf11c5507e1
+		summarizeBy: none
+		sourceColumn: quarter
+
+		annotation SummarizationSetBy = User
+
+	column month_number
+		dataType: int64
+		formatString: 0
+		lineageTag: 981cf597-9f97-4808-88a7-69561ba79034
+		summarizeBy: none
+		sourceColumn: month_number
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = User
+
+	column month_name
+		dataType: string
+		lineageTag: ab54a00b-0f96-4994-b347-59f8df3d22fe
+		summarizeBy: none
+		sourceColumn: month_name
+		sortByColumn: month_number
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column year_month
+		dataType: string
+		lineageTag: 8aec8aef-cddb-45c8-9b6a-2e792669c0be
+		summarizeBy: none
+		sourceColumn: year_month
+
+		annotation SummarizationSetBy = Automatic
+
+	column day_of_month
+		dataType: int64
+		formatString: 0
+		lineageTag: df543ed8-7cbc-4aba-8b6d-60712ef3799a
+		summarizeBy: none
+		sourceColumn: day_of_month
+
+		annotation SummarizationSetBy = User
+
+	column day_of_week
+		dataType: int64
+		formatString: 0
+		lineageTag: a74d7f87-24c8-4af6-b43a-cc180e427a5f
+		summarizeBy: none
+		sourceColumn: day_of_week
+
+		annotation SummarizationSetBy = User
+
+	column day_name
+		dataType: string
+		lineageTag: 336e93ad-c552-4d22-b048-822c1269877b
+		summarizeBy: none
+		sourceColumn: day_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_weekend
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: f47f38a8-8f71-4426-a25c-58295214f3f5
+		summarizeBy: none
+		sourceColumn: is_weekend
+
+		annotation SummarizationSetBy = Automatic
+
+	column month_name_abb = LEFT(DimDate[month_name],3)
+		lineageTag: 07d59f26-3093-4d57-a25b-3c24a05887a4
+		summarizeBy: none
+		sortByColumn: month_number
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	hierarchy 'year Hierarchy'
+		lineageTag: 92f9a57d-8cdd-4b14-b43d-928dd64ec6dd
+
+		level year
+			lineageTag: 9ec84a55-4c16-4cbd-a340-86ea2026b187
+			column: year
+
+		level month_number
+			lineageTag: e4432255-cfc2-4741-ae50-4e53f4fc37dd
+			column: month_number
+
+		level quarter
+			lineageTag: d59fed2f-6112-4fe9-96f8-281daa9cd545
+			column: quarter
+
+	partition DimDate = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("(local)", "Venesse"),
+				    dbo_DimDate = Source{[Schema="dbo",Item="DimDate"]}[Data],
+				    #"Filtered Rows" = Table.SelectRows(dbo_DimDate, each [date_key] < 20261231)
+				in
+				    #"Filtered Rows"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

@@ -1,0 +1,150 @@
+table FactExpenses
+	lineageTag: a612ece5-8084-44f1-a262-d02c3f45d283
+
+	measure 'Operating Expenses (Jan-Sep)' = CALCULATE(SUM(FactExpenses[expense_amount]), KEEPFILTERS(DimDate[month_number] <= 9))
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: eb5b477a-24e7-4bee-9616-9e457848c01a
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Campaign Costs (Jan-Sep)' = CALCULATE(SUM(FactCampaignPerformance[campaign_cost]), TREATAS(VALUES(DimDate[full_date]), DimMarketingCampaign[campaign_start_date]), KEEPFILTERS(DimDate[month_number] <= 9))
+		lineageTag: a17c941d-bf6d-420d-b725-0c5cb77b3f33
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Revenue (Jan-Sep)' = CALCULATE([Total Net Revenue], KEEPFILTERS(DimDate[month_number] <= 9))
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: b6c59e69-d7f3-4b1c-9f45-30d652515f95
+
+	measure 'Gross Profit (Jan-Sep)' = CALCULATE([Gross Profit], KEEPFILTERS(DimDate[month_number] <= 9))
+		lineageTag: 3229185c-1871-4836-8b96-04230f707cd3
+
+		formatStringDefinition = "$#,##0.00;-$#,##0.00"
+
+	measure 'Operating Profit (Jan-Sep)' = [Gross Profit (Jan-Sep)] - [Operating Expenses (Jan-Sep)] - [Campaign Costs (Jan-Sep)]
+		lineageTag: fa9c2db4-0097-40b1-ad43-e511dfe5210c
+
+		formatStringDefinition = "$#,##0.00;-$#,##0.00"
+
+	measure 'Operating Margin (Jan-Sep)' = DIVIDE([Operating Profit (Jan-Sep)], [Revenue (Jan-Sep)])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: cecbd85a-7155-450f-99e6-fbbee71bfc3e
+
+	measure 'PY Operating Profit (Jan-Sep)' = CALCULATE([Operating Profit (Jan-Sep)], DATEADD(DimDate[full_date], -1, YEAR))
+		lineageTag: b7770a4c-8c53-41a5-be6f-acc663beec42
+
+		formatStringDefinition = "$#,##0.00;-$#,##0.00"
+
+	measure 'Operating Profit YoY Improvement' = [Operating Profit 2nd (Jan-Sep)] - [PY Operating Profit 2nd (Jan-Sep)]
+		lineageTag: c03fc8f8-ae4f-4ada-a0a5-c702b786505d
+
+		formatStringDefinition = "$#,##0.00;-$#,##0.00"
+
+	measure 'PY Operating Margin (Jan-Sep)' = CALCULATE([Operating Margin 2nd (Jan-Sep)], DATEADD(DimDate[full_date], -1, YEAR))
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: a33b07c0-48cf-4310-a258-9904fcf0b6d3
+
+	measure 'Operating Margin YoY (pp)' = ([Operating Margin (Jan-Sep)] - [PY Operating Margin (Jan-Sep)]) * 100
+		formatString: 0.00
+		lineageTag: 24734958-6e4a-44d5-9afc-66b3ffd2c52e
+
+	measure 'Expense Category Share' = DIVIDE([Operating Expenses (Jan-Sep)], CALCULATE([Operating Expenses (Jan-Sep)], REMOVEFILTERS(DimExpenseCategory)))
+		formatString: 0.00%
+		lineageTag: 338ba099-04de-4667-a7ac-e129e7dbb4ad
+
+	measure 'Campaign Costs 2nd (Jan-Sep)' =
+			
+			VAR SelectedDates =
+			    FILTER(
+			        VALUES(DimDate[full_date]),
+			        MONTH(DimDate[full_date]) <= 9
+			    )
+			RETURN
+			CALCULATE(
+			    SUM(FactCampaignPerformance[campaign_cost]),
+			    REMOVEFILTERS(DimDate),
+			    REMOVEFILTERS(DimMarketingCampaign[campaign_start_date]),
+			    TREATAS(
+			        SelectedDates,
+			        DimMarketingCampaign[campaign_start_date]
+			    )
+			)
+		lineageTag: 521e5dcc-8bee-4298-aa69-c734288a0c6a
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'PY Operating Profit 2nd (Jan-Sep)' = CALCULATE([Operating Profit 2nd (Jan-Sep)], DATEADD(DimDate[full_date], -1, YEAR))
+		lineageTag: 82be57ea-eeb4-4b98-a858-3497a6370c76
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Operating Profit 2nd (Jan-Sep)' = [Gross Profit (Jan-Sep)] - [Operating Expenses (Jan-Sep)] - [Campaign Costs 2nd (Jan-Sep)]
+		lineageTag: 646545c0-14f3-48c1-a2ec-16b0d954921b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'PY Operating Margin 2nd (Jan-Sep)' = CALCULATE([Operating Margin (Jan-Sep)], DATEADD(DimDate[full_date], -1, YEAR))
+		lineageTag: 5c3ecde2-7a49-49d5-af1a-8fa3e2f4dd67
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Operating Margin 2nd (Jan-Sep)' = DIVIDE([Operating Profit 2nd (Jan-Sep)], [Revenue (Jan-Sep)])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 1dcbda2e-8160-4973-88c3-4564c0fbb308
+
+	column expense_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 876ca386-e31d-41f4-abde-759b1ad463cb
+		summarizeBy: sum
+		sourceColumn: expense_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column expense_name
+		dataType: string
+		lineageTag: eeeb903d-e680-4064-aa97-fcb42c5d27c7
+		summarizeBy: none
+		sourceColumn: expense_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column expense_category_id
+		dataType: int64
+		formatString: 0
+		lineageTag: d6e48c40-c1d7-4c64-863b-e57942773f99
+		summarizeBy: none
+		sourceColumn: expense_category_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column expense_date_key
+		dataType: int64
+		formatString: 0
+		lineageTag: aa2f3acd-2ae5-4c8f-bb2c-e22772daeccb
+		summarizeBy: none
+		sourceColumn: expense_date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column expense_amount
+		dataType: double
+		lineageTag: d242bfba-042a-4b74-969c-3388dad66daf
+		summarizeBy: sum
+		sourceColumn: expense_amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition FactExpenses = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("(local)", "Venesse"),
+				    dbo_FactExpenses = Source{[Schema="dbo",Item="FactExpenses"]}[Data]
+				in
+				    dbo_FactExpenses
+
+	annotation PBI_ResultType = Table
+

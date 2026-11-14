@@ -1,0 +1,26 @@
+table CustomerValueSegments
+	lineageTag: 5d139bb1-1993-4090-8f47-3b88a94c6d56
+
+	column 'Value Segment'
+		lineageTag: 411cfe70-44f5-44c0-84c4-a4914a73aa50
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Value Segment]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition CustomerValueSegments = calculated
+		mode: import
+		source =
+				
+				DATATABLE(
+				    "Value Segment", STRING,
+				    {
+				        {"High Value"},
+				        {"Medium Value"},
+				        {"Low Value"}
+				    }
+				)
+
+	annotation PBI_Id = d99d46f9b57d463d98d925e8b59c6667
+

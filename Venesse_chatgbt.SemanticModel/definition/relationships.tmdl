@@ -1,0 +1,78 @@
+relationship AutoDetected_ef6de916-5a06-4274-8dc7-197669094edc
+	fromColumn: FactSales.customer_id
+	toColumn: DimCustomer.customer_id
+
+relationship AutoDetected_4ff1c93c-21a1-4329-aa20-5099accfc35e
+	fromColumn: FactExpenses.expense_category_id
+	toColumn: DimExpenseCategory.expense_category_id
+
+relationship AutoDetected_17e468d5-1a02-4783-9ae7-4445c11f750f
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: FactCustomerFeedback.order_id
+	toColumn: DimOrder.order_id
+
+relationship AutoDetected_24ba6693-06f1-4f41-a2f3-b3f95e7fff78
+	fromColumn: FactSales.order_id
+	toColumn: DimOrder.order_id
+
+relationship AutoDetected_95363ce9-83ec-44e4-8f2a-d9b4e0d19d2f
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: FactCampaignPerformance.campaign_id
+	toColumn: DimMarketingCampaign.campaign_id
+
+relationship AutoDetected_6fbee937-1eac-4db4-bba9-36a30f682874
+	fromColumn: FactSales.campaign_id
+	toColumn: DimMarketingCampaign.campaign_id
+
+relationship AutoDetected_e19f170d-6177-4bb8-bb9e-d46064f54059
+	fromColumn: FactSales.status_id
+	toColumn: DimOrderStatus.status_id
+
+relationship AutoDetected_f8873ade-70f9-4af6-8c2a-df5a854ac2d2
+	fromColumn: FactSales.payment_method_key
+	toColumn: DimPaymentMethod.payment_method_key
+
+relationship AutoDetected_b67459e5-0bef-4b1b-a88c-7ea85ca4097a
+	fromColumn: FactSales.product_id
+	toColumn: DimProduct.product_id
+
+relationship b6be5f17-3d88-8574-87a6-90e695de9f99
+	fromColumn: FactSales.order_date_key
+	toColumn: DimDate.date_key
+
+relationship c51e177b-f580-82d9-a9b3-d15aa4ff0d0d
+	isActive: false
+	fromColumn: FactSales.ship_date_key
+	toColumn: DimDate.date_key
+
+relationship aad5f6ff-9fc6-f1bb-0c2c-d2c135c12055
+	isActive: false
+	fromColumn: DimMarketingCampaign.campaign_start_date
+	toColumn: DimDate.full_date
+
+relationship d83d36ed-b792-b25c-a6f1-14b666681284
+	isActive: false
+	fromColumn: DimMarketingCampaign.campaign_end_date
+	toColumn: DimDate.full_date
+
+relationship 841d4314-b2a0-10d4-9dc5-56d50ea6ebda
+	fromColumn: FactExpenses.expense_date_key
+	toColumn: DimDate.date_key
+
+relationship 941e6cfd-8b89-4477-a9bd-b8ffa3b35d44
+	joinOnDateBehavior: datePartOnly
+	fromColumn: DimCustomer.date_of_birth
+	toColumn: LocalDateTable_ffb36155-c20d-4d04-8948-01ec8547137f.Date
+
+relationship 95a5cafe-8767-4036-b562-ff38e70b3a0d
+	joinOnDateBehavior: datePartOnly
+	fromColumn: DimOrder.order_date
+	toColumn: LocalDateTable_a3ae39f2-007f-45de-829c-dbfbf0ff7418.Date
+
+relationship 2b70a3e1-a0d9-4e1f-bc0e-352eb27f0d91
+	joinOnDateBehavior: datePartOnly
+	fromColumn: DimOrder.ship_date
+	toColumn: LocalDateTable_858f11de-3bb7-457d-a812-014647709fc9.Date
+

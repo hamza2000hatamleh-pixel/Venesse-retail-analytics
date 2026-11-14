@@ -1,0 +1,120 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "name": "092fd008d7834341ba90",
+  "position": {
+    "x": 30,
+    "y": 750,
+    "z": 1500,
+    "height": 293.33333333333337,
+    "width": 1850,
+    "tabOrder": 1500
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "KEY BUSINESS INSIGHTS",
+                    "textStyle": {
+                      "fontSize": "15pt"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "1. Profitability Improvement",
+                    "textStyle": {
+                      "fontWeight": "bold",
+                      "fontSize": "15pt"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Operating losses decreased by approximately 49% YoY, supported by 14.33% revenue growth, improved gross profitability, and a 7.29% reduction in operating expenses. However, the company remains unprofitable.",
+                    "textStyle": {
+                      "fontSize": "15pt"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "2. Operating Cost Pressure",
+                    "textStyle": {
+                      "fontWeight": "bold",
+                      "fontSize": "15pt"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Operating expenses and campaign costs total $288.52K, exceeding gross profit of $229.10K. Seven of nine months recorded operating losses, indicating that the current cost structure remains unsustainable.",
+                    "textStyle": {
+                      "fontSize": "15pt"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "3. Expense Optimization",
+                    "textStyle": {
+                      "fontWeight": "bold",
+                      "fontSize": "15pt"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Marketing and Technology account for 44.83% of operating expenses. Review spending efficiency and identify cost-saving opportunities without compromising revenue generation or operational performance.",
+                    "textStyle": {
+                      "fontSize": "15pt"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "4. Strategic Recommendations",
+                    "textStyle": {
+                      "fontWeight": "bold",
+                      "fontSize": "15pt"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Prioritize selective expansion of profitable marketing campaigns, test pricing adjustments on high-performing products, and implement targeted expense optimization to improve operating margins.",
+                    "textStyle": {
+                      "fontSize": "15pt"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

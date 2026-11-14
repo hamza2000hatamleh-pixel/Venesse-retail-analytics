@@ -1,0 +1,36 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "name": "e2eb471934501b2b7190",
+  "position": {
+    "x": 25,
+    "y": 90,
+    "z": 9000,
+    "height": 107.5,
+    "width": 1852.5,
+    "tabOrder": 9000
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "TV Stand gross profit increased 121% YoY. Consider testing a 10–20% inventory increase and modest pricing adjustments, subject to demand forecasts, inventory turnover, and price sensitivity.",
+                    "textStyle": {
+                      "fontSize": "20pt"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

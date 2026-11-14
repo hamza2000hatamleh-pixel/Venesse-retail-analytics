@@ -1,0 +1,8 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "bccb7b7862e52d8785c3",
+  "displayName": "PAGE 1 — SALES & PROFITABILITY OVERVIEW",
+  "displayOption": "FitToPage",
+  "height": 1080,
+  "width": 1920
+}

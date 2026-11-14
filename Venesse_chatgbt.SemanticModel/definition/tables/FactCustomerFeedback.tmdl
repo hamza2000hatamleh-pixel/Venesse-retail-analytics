@@ -1,0 +1,312 @@
+table FactCustomerFeedback
+	lineageTag: 7ae31df5-3842-4e3e-ac58-67cc6ee9c66d
+
+	measure 'Total Reviews' = ```
+			VAR SelectedYear =
+			    SELECTEDVALUE(DimDate[year])
+			
+			VAR StartDate =
+			    DATE(SelectedYear, 1, 1)
+			
+			VAR EndDate =
+			    DATE(SelectedYear, 9, 30)
+			
+			RETURN
+			IF(
+			    NOT ISBLANK(SelectedYear),
+			    CALCULATE(
+			        COUNTROWS(FactCustomerFeedback),
+			        REMOVEFILTERS(DimOrder),
+			        DATESBETWEEN(
+			            DimOrder[order_date],
+			            StartDate,
+			            EndDate
+			        )
+			    )
+			) 
+			```
+		formatString: 0
+		lineageTag: 9804124d-bea0-4ccc-b891-3f53363daaba
+
+	measure 'Reviews by Order Status' =
+			
+			VAR SelectedOrders =
+			    CALCULATETABLE(
+			        VALUES(FactSales[order_id]),
+			        TREATAS(
+			            VALUES(DimOrderStatus[status_id]),
+			            FactSales[status_id]
+			        )
+			    )
+			RETURN
+			    CALCULATE(
+			        [Total Reviews],
+			        TREATAS(
+			            SelectedOrders,
+			            FactCustomerFeedback[order_id]
+			        )
+			    )
+		formatString: 0
+		lineageTag: 8e828f06-3341-494a-8db1-5c7044452d10
+
+	measure 'Average Customer Rating' =
+			VAR SelectedYear =
+			    SELECTEDVALUE(DimDate[year])
+			
+			VAR StartDate =
+			    DATE(SelectedYear, 1, 1)
+			
+			VAR EndDate =
+			    DATE(SelectedYear, 9, 30)
+			
+			RETURN
+			IF(
+			    NOT ISBLANK(SelectedYear),
+			    CALCULATE(
+			        AVERAGE(FactCustomerFeedback[out_of_5_star]),
+			        REMOVEFILTERS(DimOrder),
+			        DATESBETWEEN(
+			            DimOrder[order_date],
+			            StartDate,
+			            EndDate
+			        )
+			    )
+			)
+		lineageTag: e5e0e752-4d29-4151-a3ad-a9c0e75ebd27
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Positive Reviews' =
+			
+			VAR SelectedYear =
+			    SELECTEDVALUE(DimDate[year])
+			
+			VAR StartDate =
+			    DATE(SelectedYear, 1, 1)
+			
+			VAR EndDate =
+			    DATE(SelectedYear, 9, 30)
+			
+			RETURN
+			IF(
+			    NOT ISBLANK(SelectedYear),
+			    CALCULATE(
+			        COUNTROWS(FactCustomerFeedback),
+			        REMOVEFILTERS(DimOrder),
+			        DATESBETWEEN(
+			            DimOrder[order_date],
+			            StartDate,
+			            EndDate
+			        ),
+			        KEEPFILTERS(
+			            FactCustomerFeedback[out_of_5_star] >= 4
+			        )
+			    )
+			)
+		formatString: 0
+		lineageTag: 95c8cf69-f47a-4f23-a507-65544adebfd0
+
+	measure 'Positive Review %' =
+			
+			DIVIDE(
+			    [Positive Reviews],
+			    CALCULATE(
+			        [Total Reviews],
+			        REMOVEFILTERS(FactCustomerFeedback[out_of_5_star])
+			    )
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 27858d06-cd85-490f-8765-c67ab1c00a33
+
+	measure 'Negative Reviews' =
+			
+			VAR SelectedYear =
+			    SELECTEDVALUE(DimDate[year])
+			
+			VAR StartDate =
+			    DATE(SelectedYear, 1, 1)
+			
+			VAR EndDate =
+			    DATE(SelectedYear, 9, 30)
+			
+			RETURN
+			IF(
+			    NOT ISBLANK(SelectedYear),
+			    CALCULATE(
+			        COUNTROWS(FactCustomerFeedback),
+			        REMOVEFILTERS(DimOrder),
+			        DATESBETWEEN(
+			            DimOrder[order_date],
+			            StartDate,
+			            EndDate
+			        ),
+			        KEEPFILTERS(
+			            FactCustomerFeedback[out_of_5_star] <= 2
+			        )
+			    )
+			)
+		formatString: 0
+		lineageTag: 2ea47e56-9fa7-4c9c-b483-6f5875436063
+
+	measure 'Negative Review %' = DIVIDE([Negative Reviews],[Total Reviews])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: d78dbe87-1847-4f1d-8637-cf05f7d0d59a
+
+	measure 'Reviews by Rating' =
+			
+			VAR SelectedYear =
+			    SELECTEDVALUE(DimDate[year])
+			
+			VAR StartDate =
+			    DATE(SelectedYear, 1, 1)
+			
+			VAR EndDate =
+			    DATE(SelectedYear, 9, 30)
+			
+			RETURN
+			IF(
+			    NOT ISBLANK(SelectedYear),
+			    CALCULATE(
+			        COUNTROWS(FactCustomerFeedback),
+			        REMOVEFILTERS(DimOrder),
+			        DATESBETWEEN(
+			            DimOrder[order_date],
+			            StartDate,
+			            EndDate
+			        ),
+			        KEEPFILTERS(
+			            VALUES(FactCustomerFeedback[out_of_5_star])
+			        )
+			    )
+			)
+		formatString: 0
+		lineageTag: 6f1f9798-5d9c-4883-b26e-aebf6f5459e4
+
+	measure 'Reviews by Region' =
+			
+			VAR SelectedYear =
+			    SELECTEDVALUE(DimDate[year])
+			
+			VAR SelectedCustomers =
+			    VALUES(DimCustomer[customer_id])
+			
+			RETURN
+			IF(
+			    NOT ISBLANK(SelectedYear),
+			    CALCULATE(
+			        COUNTROWS(FactCustomerFeedback),
+			
+			        TREATAS(
+			            SelectedCustomers,
+			            DimOrder[customer_id]
+			        ),
+			
+			        FILTER(
+			            ALL(DimOrder[order_date]),
+			            DimOrder[order_date] >= DATE(SelectedYear, 1, 1)
+			                && DimOrder[order_date] < DATE(SelectedYear, 10, 1)
+			        )
+			    )
+			)
+		formatString: 0
+		lineageTag: 9ac3912e-8858-41c2-8174-deffdb4dbac3
+
+	measure 'Negative Reviews by Region' =
+			
+			CALCULATE(
+			    [Reviews by Region],
+			    KEEPFILTERS(
+			        FactCustomerFeedback[out_of_5_star] <= 2
+			    )
+			)
+		formatString: 0
+		lineageTag: 5841d6f4-7d7e-41f6-a812-3a27c36c5fbd
+
+	measure 'Negative Review by Region %' = DIVIDE([Negative Reviews by Region],[Reviews by Region])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 7d92aaef-7eff-4294-98f2-74d1fe9ea601
+
+	measure 'Negative Comments Count' =
+			
+			CALCULATE(
+			    [Reviews by Region],
+			    KEEPFILTERS(
+			        FactCustomerFeedback[out_of_5_star] <= 2
+			    )
+			)
+		formatString: 0
+		lineageTag: ddac7760-b27b-442d-9238-d7bf1ac899f1
+
+	column feedback_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 8348a2b4-efad-49e1-a3f0-78bb42d7ecb7
+		summarizeBy: none
+		sourceColumn: feedback_id
+		sortByColumn: order_id
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = User
+
+	column order_id
+		dataType: int64
+		formatString: 0
+		lineageTag: a7d76d47-f48b-4330-8a6f-b967e5c0808a
+		summarizeBy: none
+		sourceColumn: order_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column out_of_5_star
+		dataType: int64
+		formatString: 0
+		lineageTag: f43f0956-6303-43c6-9100-b29b61961492
+		summarizeBy: none
+		sourceColumn: out_of_5_star
+
+		annotation SummarizationSetBy = User
+
+	column comments
+		dataType: string
+		lineageTag: 373bc3ef-3c65-4b1d-b6c6-a0abf5e72354
+		summarizeBy: none
+		sourceColumn: comments
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Complaint Category' =
+			
+			VAR Rating = FactCustomerFeedback[out_of_5_star]
+			VAR Comment = FactCustomerFeedback[comments]
+			
+			RETURN
+			IF(
+			    Rating > 2,
+			    "Not a Complaint",
+			    SWITCH(
+			        TRUE(),
+			        Comment = "Slow delivery", "Delivery",
+			        Comment = "Product arrived damaged", "Product Quality / Handling",
+			        Comment = "Quality below expectation", "Product Quality / Handling",
+			        "General Dissatisfaction"
+			    )
+			)
+		lineageTag: 86cb3ceb-45e6-4673-9bcd-3c80d426f0c5
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition FactCustomerFeedback = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("(local)", "Venesse"),
+				    dbo_FactCustomerFeedback = Source{[Schema="dbo",Item="FactCustomerFeedback"]}[Data]
+				in
+				    dbo_FactCustomerFeedback
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

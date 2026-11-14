@@ -1,0 +1,47 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "name": "4b9a62c002e9465ca033",
+  "position": {
+    "x": 30,
+    "y": 16.666666666666668,
+    "z": 0,
+    "height": 110,
+    "width": 1550,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "OPERATING EXPENSES & PROFITABILITY",
+                    "textStyle": {
+                      "fontWeight": "bold",
+                      "fontSize": "23pt"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Venesse Retail | January–September | Campaign costs treated as separate (provisional)",
+                    "textStyle": {
+                      "fontSize": "15pt"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

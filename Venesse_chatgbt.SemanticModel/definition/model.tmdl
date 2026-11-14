@@ -1,0 +1,36 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	valueFilterBehavior: independent
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_QueryOrder = ["DimCustomer","DimExpenseCategory","DimOrder","DimMarketingCampaign","DimOrderStatus","DimPaymentMethod","FactCampaignPerformance","DimProduct","FactCustomerFeedback","FactExpenses","FactSales","DimDate"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table DimCustomer
+ref table DimExpenseCategory
+ref table DimOrder
+ref table DimMarketingCampaign
+ref table DimOrderStatus
+ref table DimPaymentMethod
+ref table FactCampaignPerformance
+ref table DimProduct
+ref table FactCustomerFeedback
+ref table FactExpenses
+ref table FactSales
+ref table DimDate
+ref table DateTableTemplate_aa11571a-26db-458b-8e47-93ca36a10c7e
+ref table LocalDateTable_ffb36155-c20d-4d04-8948-01ec8547137f
+ref table LocalDateTable_a3ae39f2-007f-45de-829c-dbfbf0ff7418
+ref table LocalDateTable_858f11de-3bb7-457d-a812-014647709fc9
+ref table CustomerSegments
+ref table CustomerValueSegments
+
+ref cultureInfo en-US
+

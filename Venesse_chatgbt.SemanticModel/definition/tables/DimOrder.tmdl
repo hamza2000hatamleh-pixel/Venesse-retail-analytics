@@ -1,0 +1,150 @@
+table DimOrder
+	lineageTag: cf777047-819e-4021-bb05-6a8c15062636
+
+	measure 'Delivered Order Count' =
+			VAR SelectedYear =
+			    SELECTEDVALUE(DimDate[year])
+			
+			VAR StartDate =
+			    DATE(SelectedYear, 1, 1)
+			
+			VAR EndDate =
+			    DATE(SelectedYear, 9, 30)
+			
+			RETURN
+			IF(
+			    NOT ISBLANK(SelectedYear),CALCULATE(DISTINCTCOUNT(FactSales[order_id]),FILTER(DimOrderStatus,DimOrderStatus[status_name] = "delivered"), REMOVEFILTERS(DimDate),
+			        DATESBETWEEN(
+			            DimDate[full_date],
+			            StartDate,
+			            EndDate
+			        )))
+		formatString: 0
+		lineageTag: de476565-8832-4dfb-ac0d-2e58793904cf
+
+	measure 'Customer Purchase Frequency Segmentation' = SWITCH(TRUE(), DimOrder[Delivered Order Count] = 1 , "One-Time Customer",DimOrder[Delivered Order Count] > 1 && DimOrder[Delivered Order Count] <= 3, "Repeat Customer", DimOrder[Delivered Order Count]>=4,"Loyal Customer")
+		lineageTag: fd21b5d1-0870-40eb-9dc6-793cebae1d64
+
+	measure 'One-Time Customer Count' =
+			
+			COUNTROWS(
+			    FILTER(
+			        VALUES(DimCustomer[customer_id]),
+			        [Delivered Order Count] = 1
+			    )
+			)
+		formatString: 0
+		lineageTag: 925f21a5-99a1-4c80-9121-7be72f208520
+
+	measure 'Loyal Customer Count' = ```
+			COUNTROWS(
+			    FILTER(
+			        VALUES(DimCustomer[customer_id]),
+			        [Delivered Order Count] >=4 
+			    )
+			)
+			```
+		formatString: 0
+		lineageTag: dc34d94f-ca10-4c38-a85d-f48acaeb6cb3
+
+	measure 'Repeat Customer(2-3)' =
+			
+			COALESCE(
+			    COUNTROWS(
+			        FILTER(
+			            VALUES(DimCustomer[customer_id]),
+			            [Delivered Order Count] >= 2
+			                && [Delivered Order Count] <= 3
+			        )
+			    ),
+			    0
+			)
+		formatString: 0
+		lineageTag: f5643acf-6f64-4b0a-ad11-4b92b8c9478e
+
+	measure 'Previous Year Delivered Order Count' =
+			
+			VAR SelectedYear =
+			    SELECTEDVALUE(DimDate[year])
+			
+			RETURN
+			IF(
+			    NOT ISBLANK(SelectedYear),
+			    CALCULATE(
+			        DISTINCTCOUNT(FactSales[order_id]),
+			        DimOrderStatus[status_name] = "delivered",
+			        REMOVEFILTERS(DimDate),
+			        DATESBETWEEN(
+			            DimDate[full_date],
+			            DATE(SelectedYear - 1, 1, 1),
+			            DATE(SelectedYear - 1, 9, 30)
+			        )
+			    )
+			)
+		formatString: 0
+		lineageTag: 355e9f70-6100-4420-85d6-31102e9e76ad
+
+	column order_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 1ba4ca89-a7c7-423f-8c41-a064e18db5f7
+		summarizeBy: none
+		sourceColumn: order_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column order_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 1903835e-a4b4-4f40-91fa-e94cba26d9d5
+		summarizeBy: none
+		sourceColumn: order_date
+
+		variation Variation
+			isDefault
+			relationship: 95a5cafe-8767-4036-b562-ff38e70b3a0d
+			defaultHierarchy: LocalDateTable_a3ae39f2-007f-45de-829c-dbfbf0ff7418.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column ship_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 26e2ce44-66fa-43e9-80da-08395a8a0773
+		summarizeBy: none
+		sourceColumn: ship_date
+
+		variation Variation
+			isDefault
+			relationship: 2b70a3e1-a0d9-4e1f-bc0e-352eb27f0d91
+			defaultHierarchy: LocalDateTable_858f11de-3bb7-457d-a812-014647709fc9.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column customer_id
+		dataType: int64
+		formatString: 0
+		lineageTag: d88d10bb-d3e6-4349-a992-8e185350203c
+		summarizeBy: none
+		sourceColumn: customer_id
+
+		annotation SummarizationSetBy = User
+
+	partition DimOrder = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("(local)", "Venesse"),
+				    dbo_DimOrder = Source{[Schema="dbo",Item="DimOrder"]}[Data],
+				    #"Sorted Rows" = Table.Sort(dbo_DimOrder,{{"order_date", Order.Ascending}})
+				in
+				    #"Sorted Rows"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

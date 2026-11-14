@@ -1,0 +1,676 @@
+table DimCustomer
+	lineageTag: f98a5333-f5c5-4390-baa2-168100e8c235
+
+	measure 'Total Customers' = CALCULATE(DISTINCTCOUNT(DimCustomer[customer_id]))
+		formatString: 0
+		lineageTag: c780be84-4b48-47af-be8a-1050ba0d650e
+
+	measure 'Repeat Customer' = ```
+			
+			VAR customers =
+			    VALUES(DimCustomer[customer_id])
+			
+			VAR repeat_customers =
+			    FILTER(
+			        customers,
+			        CALCULATE(
+			            DISTINCTCOUNT(FactSales[order_id]),
+			            DimOrderStatus[status_name] = "delivered"
+			        ) >= 2 
+			    )
+			
+			RETURN
+			    COALESCE(
+			        COUNTROWS(repeat_customers),
+			        0
+			    )
+			```
+		formatString: 0
+		lineageTag: 0aa8b6d6-bfa3-4800-80be-e4dc5d500c0c
+
+	measure 'Total active customers' = CALCULATE(DISTINCTCOUNT(FactSales[customer_id]),DimOrderStatus[status_name]="delivered")
+		formatString: 0
+		lineageTag: 89f377a3-aaba-4726-b20d-90b290dd991a
+
+	measure 'Repeat Customer Rate' = DIVIDE([Repeat Customer],[Total active customers])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 6b442a1f-1e94-418c-8cfd-57f675cafa92
+
+	measure 'Current Year Active Customer Comparable' =
+			VAR SelectedYear =
+			    SELECTEDVALUE(DimDate[year])
+			
+			VAR StartDate =
+			    DATE(SelectedYear, 1, 1)
+			
+			VAR EndDate =
+			    DATE(SelectedYear, 9, 30)
+			
+			RETURN
+			IF(
+			    NOT ISBLANK(SelectedYear),CALCULATE([Total active customers],REMOVEFILTERS(DimDate),
+			        DATESBETWEEN(
+			            DimDate[full_date],
+			            StartDate,
+			            EndDate)))
+		formatString: 0
+		lineageTag: c75f28d6-05cf-44eb-b4fd-e1f0710d6015
+
+	measure 'Current Year Repeat Customers Comparable' =
+			VAR SelectedYear =
+			    SELECTEDVALUE(DimDate[year])
+			
+			VAR StartDate =
+			    DATE(SelectedYear, 1, 1)
+			
+			VAR EndDate =
+			    DATE(SelectedYear, 9, 30)
+			
+			RETURN
+			IF(
+			    NOT ISBLANK(SelectedYear),CALCULATE([Repeat Customer],REMOVEFILTERS(DimDate),
+			        DATESBETWEEN(
+			            DimDate[full_date],
+			            StartDate,
+			            EndDate)))
+		formatString: 0
+		lineageTag: cfc5e932-e3c5-45e9-b57a-dff43ec2d5e4
+
+	measure 'Current Year Repeat Customer Rate Comparable' =
+			
+			DIVIDE(
+			    [Current Year Repeat Customers Comparable],
+			    [Current Year Active Customer Comparable]
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 0a01a4c0-0e3d-4aa4-94c4-94f15df12d95
+
+	measure 'Previous Year Active Customers' =
+			var SelectedYear = SELECTEDVALUE(DimDate[year]) var PreviousYear_ = selectedyear - 1 VAR StartDate = DATE(PreviousYear_,1,1) var EndDate = DATE(PreviousYear_,9,30) RETURN if(NOT ISBLANK(SelectedYear),
+			CALCULATE(
+			    [Total active customers],
+			    REMOVEFILTERS(DimDate),DATESBETWEEN(DimDate[full_date],StartDate,EndDate)
+			))
+		formatString: 0
+		lineageTag: a04c6cdb-4e9e-4795-a718-9ce4c927d9b1
+
+	measure 'Previous Year Repeat Customer' =
+			var SelectedYear = SELECTEDVALUE(DimDate[year]) var PreviousYear_ = selectedyear - 1 VAR StartDate = DATE(PreviousYear_,1,1) var EndDate = DATE(PreviousYear_,9,30) RETURN if(NOT ISBLANK(SelectedYear),
+			CALCULATE(
+			    [Repeat Customer],
+			    REMOVEFILTERS(DimDate),DATESBETWEEN(DimDate[full_date],StartDate,EndDate)
+			))
+		formatString: 0
+		lineageTag: 159621a0-6792-4405-8047-ed5d21e46d97
+
+	measure 'Previous Year Repeat Customer Rate' = DIVIDE([Previous Year Repeat Customer],[Previous Year Active Customers])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 940d7646-26cb-478e-b717-df8383b0eb7d
+
+	measure 'Active Customers YoY Growth %' = DIVIDE([Current Year Active Customer Comparable] - [Previous Year Active Customers],[Previous Year Active Customers])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 05101060-8c3c-4c1f-b463-3745343812af
+
+	measure 'Repeat Customers YoY Growth %' = DIVIDE([Current Year Repeat Customers Comparable]-[Previous Year Repeat Customer],[Previous Year Repeat Customer])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: b6008245-dc03-4ecd-a9b4-60393b73ac40
+
+	measure 'Repeat Customer Rate YoY Change (pp)' =
+			
+			VAR CurrentRate =
+			    [Current Year Repeat Customer Rate Comparable]
+			
+			VAR PreviousRate =
+			    [Previous Year Repeat Customer Rate]
+			
+			RETURN
+			IF(
+			    ISBLANK(CurrentRate) || ISBLANK(PreviousRate),
+			    BLANK(),
+			    (CurrentRate - PreviousRate) * 100
+			)
+		lineageTag: 3c91d4ad-ae8f-4f3c-a815-c160483a1bf6
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Previous Year Active Customers' =
+			var selectedmonth = SELECTEDVALUE(DimDate[month_number])var SelectedYear = SELECTEDVALUE(DimDate[year]) var PreviousYear_ = selectedyear - 1 VAR StartDate = DATE(PreviousYear_,selectedmonth,1) VAR EndDate =
+			    EOMONTH(StartDate, 0) RETURN if(NOT ISBLANK(SelectedYear),
+			CALCULATE(
+			    [Total active customers],REMOVEFILTERS(DimDate),DATESBETWEEN(DimDate[full_date],StartDate,EndDate)
+			))
+		formatString: 0
+		lineageTag: ab3e94df-8304-4cbf-96b2-3887b20f44bc
+
+	measure 'Total Previous Year Repeat Customers' = ```
+			var selectedmonth = SELECTEDVALUE(DimDate[month_number])var SelectedYear = SELECTEDVALUE(DimDate[year]) var PreviousYear_ = selectedyear - 1 VAR StartDate = DATE(PreviousYear_,selectedmonth,1) VAR EndDate =
+			    EOMONTH(StartDate, 0) RETURN 
+			var sex = if(NOT ISBLANK(SelectedYear),CALCULATE(
+			    [Repeat Customer],DATESBETWEEN(DimDate[full_date],StartDate,EndDate)
+			)) RETURN COALESCE(sex,0)
+			```
+		formatString: 0
+		lineageTag: e9a7a327-cc45-4f3b-940d-d1b961ab7e1e
+
+	measure 'Cumulative Repeat Customers' =
+			
+			VAR CurrentMonthEnd =
+			    MAX(DimDate[full_date])
+			
+			VAR StartDate =
+			    DATE(YEAR(CurrentMonthEnd), 1, 1)
+			
+			RETURN
+			    CALCULATE(
+			        [Repeat Customer],
+			        REMOVEFILTERS(DimDate),
+			        DATESBETWEEN(
+			            DimDate[full_date],
+			            StartDate,
+			            CurrentMonthEnd
+			        )
+			    )
+		formatString: 0
+		lineageTag: 434b16e6-8890-4039-80eb-97ffe5c34028
+
+	measure 'Previous Year Cumulative Repeat Customers' =
+			
+			VAR CurrentMonthEnd =
+			    MAX(DimDate[full_date])
+			
+			VAR CurrentMonth =
+			    MONTH(CurrentMonthEnd)
+			
+			VAR CurrentYear =
+			    YEAR(CurrentMonthEnd)
+			
+			VAR PreviousYear_ =
+			    CurrentYear - 1
+			
+			VAR StartDate =
+			    DATE(PreviousYear_, 1, 1)
+			
+			VAR EndDate =
+			    EOMONTH(
+			        DATE(PreviousYear_, CurrentMonth, 1),
+			        0
+			    )
+			
+			RETURN
+			     CALCULATE([Repeat Customer],REMOVEFILTERS(dimdate),DATESBETWEEN(DimDate[full_date],StartDate,enddate))
+		formatString: 0
+		lineageTag: b0caba86-8d10-4e3a-b4ed-59d43b29cafe
+
+	measure 'Noraml Repeat Customer rate' = DIVIDE([Repeat Customer],[Total active customers],0)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 96e112a1-beaf-4366-b6cd-9dac0672bb3b
+
+	measure 'Normal Previous Year Repeat Customer Rate' = divide([Total Previous Year Repeat Customers],[Total Previous Year Active Customers],0)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 648f6f4c-3b08-4f80-969e-67fe6bd16e98
+
+	measure 'Current Year Top 10% Customer Revenue' = ```
+			
+			VAR TopCustomerCount =
+			    ROUNDUP(
+			        [Current Year Active Customer Comparable] * 0.10,
+			        0
+			    )
+			
+			VAR ActiveCustomers =
+			    FILTER(
+			        ALL(DimCustomer[customer_id]),
+			        [Delivered Order Count] > 0
+			    ) VAR TopCustomer = TOPN(TopCustomerCount,ActiveCustomers,[Current Year Revenue],DESC)   RETURN SUMX(TopCustomer,[Current Year Revenue])                                                               
+			```
+		formatString: \$#,0.000;(\$#,0.000);\$#,0.000
+		lineageTag: 1513e572-f6b3-4e1c-9c98-fc9377892b7e
+
+	measure 'Current Year Top 10% Contribution %' = DIVIDE([Current Year Top 10% Customer Revenue],[Current Year Revenue])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 4db5cb96-5250-41d2-96df-e7e4e642f71d
+
+	measure 'Previous Year Top 10% Customer Revenue' = ```
+			
+			VAR TopCustomerCount =
+			    ROUNDUP(
+			        [Previous Year Active Customers] * 0.10,
+			        0
+			    )
+			
+			VAR ActiveCustomers =
+			    FILTER(
+			        ALL(DimCustomer[customer_id]),
+			        [Previous Year Delivered Order Count] > 0
+			    ) VAR TopCustomer = TOPN(TopCustomerCount,ActiveCustomers,[previous Year Revenue],DESC)   RETURN SUMX(TopCustomer,[Previous Year Revenue])                                                               
+			```
+		lineageTag: 11a937b7-67a6-4edd-945f-ffe75aad660b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Previous Year Top 10% Contribution %' = DIVIDE([Previous Year Top 10% Customer Revenue],[Previous Year Revenue])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: d6385fae-00f9-4076-a6d2-21faea51a5f5
+
+	measure 'Top 10% Revenue Contribution YoY Change(pp)' =
+			
+			VAR CurrentRate =
+			    [Current Year Top 10% Contribution %]
+			
+			VAR PreviousRate =
+			    [Previous Year Top 10% Contribution %]
+			
+			RETURN
+			IF(
+			    ISBLANK(CurrentRate) || ISBLANK(PreviousRate),
+			    BLANK(),
+			    (CurrentRate - PreviousRate) * 100
+			)
+		lineageTag: 7124c69b-d141-4647-98ae-f42c4a916d55
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'PY Customer Cohort Count' =
+			VAR SelectedYear =
+			    SELECTEDVALUE(DimDate[year])
+			
+			VAR StartDate_ =
+			    DATE(SelectedYear-1, 1, 1)
+			
+			VAR EndDate_ =
+			    DATE(SelectedYear-1, 9, 30)
+			
+			RETURN
+			IF(
+			    NOT ISBLANK(SelectedYear),CALCULATE([Total active customers],REMOVEFILTERS(DimDate),
+			        DATESBETWEEN(
+			            DimDate[full_date],
+			            StartDate_,
+			            EndDate_)))
+		formatString: 0
+		lineageTag: ddf063d8-114a-435f-8c51-9fab6fdc9c57
+
+	measure 'PY High Value Customer Count' =
+			
+			
+			VAR SelectedYear =
+			    SELECTEDVALUE(DimDate[year])
+			
+			VAR StartDate =
+			    DATE(SelectedYear - 1, 1, 1)
+			
+			VAR EndDate =
+			    DATE(SelectedYear - 1, 9, 30)                                     VAR CustomerTable = CALCULATETABLE(
+			        VALUES(FactSales[customer_id]),
+			        REMOVEFILTERS(DimDate),
+			        DATESBETWEEN(
+			            DimDate[full_date],
+			            StartDate,
+			            EndDate
+			        ),DimOrderStatus[status_name] = "delivered"
+			    )VAR CustomerRevenueTable =
+			    ADDCOLUMNS(
+			        CustomerTable,
+			        "PY Revenue",
+			        [Previous Year Revenue]
+			    )VAR RankedCustomers =
+			    ADDCOLUMNS(
+			        CustomerRevenueTable,
+			        "Revenue Rank",
+			        RANKX(
+			            CustomerRevenueTable,
+			            [PY Revenue],
+			            ,
+			            DESC,
+			            DENSE
+			        )
+			    )VAR TotalCustomers =
+			    COUNTROWS(RankedCustomers)
+			
+			VAR HighValueLimit =
+			    ROUNDUP(TotalCustomers * 0.20, 0)
+			
+			VAR MediumValueLimit =
+			    ROUNDUP(TotalCustomers * 0.50, 0)                                                                    VAR CustomerSegment = ADDCOLUMNS(RankedCustomers,"SegmentedCustomer",SWITCH(TRUE(),[Revenue Rank]<=HighValueLimit,"High Value", [Revenue Rank]<=MediumValueLimit,"Medium Value","Low Value"))RETURN
+			    IF(
+			        NOT ISBLANK(SelectedYear),
+			        COUNTROWS(
+			            FILTER(
+			                CustomerSegment,
+			                [SegmentedCustomer] = "High Value"
+			            )
+			        )
+			    )
+		formatString: 0
+		lineageTag: 9d6c1639-a191-4030-a15b-8b9c4a52ecb2
+
+	measure 'Retained Customers' =
+			
+			
+			VAR SelectedYear =
+			    SELECTEDVALUE(DimDate[year])
+			
+			VAR StartDate =
+			    DATE(SelectedYear , 1, 1)
+			
+			VAR EndDate =
+			    DATE(SelectedYear , 9, 30)                                        VAR CYCustomerTable =  CALCULATETABLE(
+			        VALUES(FactSales[customer_id]),
+			        REMOVEFILTERS(DimDate),
+			        DATESBETWEEN(
+			            DimDate[full_date],
+			            StartDate,
+			            EndDate
+			        ),DimOrderStatus[status_name] = "delivered")                                                  VAR StartDate_ =
+			    DATE(SelectedYear - 1 , 1, 1)
+			
+			VAR EndDate_ =
+			    DATE(SelectedYear -1 , 9, 30)                                        VAR PYCustomerTable =  CALCULATETABLE(
+			        VALUES(FactSales[customer_id]),
+			        REMOVEFILTERS(DimDate),
+			        DATESBETWEEN(
+			            DimDate[full_date],
+			            StartDate_,
+			            EndDate_
+			        ),DimOrderStatus[status_name] = "delivered")  RETURN
+			    IF(
+			        NOT ISBLANK(SelectedYear),
+			        COUNTROWS(
+			            INTERSECT(PYCustomerTable, CYCustomerTable)
+			        )
+			    )
+		formatString: 0
+		lineageTag: d070f0a4-61bd-4195-b159-e5a842b031d3
+
+	measure 'Non-Retained Customers' =
+			
+			
+			VAR SelectedYear =
+			    SELECTEDVALUE(DimDate[year])
+			
+			VAR StartDate =
+			    DATE(SelectedYear , 1, 1)
+			
+			VAR EndDate =
+			    DATE(SelectedYear , 9, 30)                                        VAR CYCustomerTable =  CALCULATETABLE(
+			        VALUES(FactSales[customer_id]),
+			        REMOVEFILTERS(DimDate),
+			        DATESBETWEEN(
+			            DimDate[full_date],
+			            StartDate,
+			            EndDate
+			        ),DimOrderStatus[status_name] = "delivered")                                                  VAR StartDate_ =
+			    DATE(SelectedYear - 1 , 1, 1)
+			
+			VAR EndDate_ =
+			    DATE(SelectedYear -1 , 9, 30)                                        VAR PYCustomerTable =  CALCULATETABLE(
+			        VALUES(FactSales[customer_id]),
+			        REMOVEFILTERS(DimDate),
+			        DATESBETWEEN(
+			            DimDate[full_date],
+			            StartDate_,
+			            EndDate_
+			        ),DimOrderStatus[status_name] = "delivered")   RETURN
+			    IF(
+			        NOT ISBLANK(SelectedYear),
+			        COUNTROWS(
+			            EXCEPT(PYCustomerTable, CYCustomerTable)
+			        )
+			    )
+		formatString: 0
+		lineageTag: ea8297a0-1e8b-40b3-b653-b911ed2b214a
+
+	measure 'PY Revenue at Risk' =
+			VAR SelectedYear =
+			    SELECTEDVALUE(DimDate[year])
+			
+			VAR StartDate =
+			    DATE(SelectedYear , 1, 1)
+			
+			VAR EndDate =
+			    DATE(SelectedYear , 9, 30)                                        VAR CYCustomerTable =  CALCULATETABLE(
+			        VALUES(FactSales[customer_id]),
+			        REMOVEFILTERS(DimDate),
+			        DATESBETWEEN(
+			            DimDate[full_date],
+			            StartDate,
+			            EndDate
+			        ),DimOrderStatus[status_name] = "delivered")                                                  VAR StartDate_ =
+			    DATE(SelectedYear - 1 , 1, 1)
+			
+			VAR EndDate_ =
+			    DATE(SelectedYear -1 , 9, 30)                                        VAR PYCustomerTable =  CALCULATETABLE(
+			        VALUES(FactSales[customer_id]),
+			        REMOVEFILTERS(DimDate),
+			        DATESBETWEEN(
+			            DimDate[full_date],
+			            StartDate_,
+			            EndDate_
+			        ),DimOrderStatus[status_name] = "delivered") VAR NonReturningCustomers = EXCEPT(PYCustomerTable,CYCustomerTable) RETURN IF(
+			        NOT ISBLANK(SelectedYear),SUMX(NonReturningCustomers,[Previous Year Revenue]))
+		lineageTag: adbeb86d-7cb6-430c-b9d6-78fb8a4331cd
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'PY Revenue at Risk %' = DIVIDE([PY Revenue at Risk],[Previous Year Revenue])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 312b1881-2f13-442e-9aad-5c8b1def0f9f
+
+	measure 'PY Revenue at Risk by Segment' = ```
+			
+			
+			VAR SelectedYear =
+			    SELECTEDVALUE(DimDate[year])
+			
+			VAR StartDate =
+			    DATE(SelectedYear - 1, 1, 1)
+			
+			VAR EndDate =
+			    DATE(SelectedYear - 1, 9, 30)                                     VAR PYCustomerTable = CALCULATETABLE(
+			        VALUES(FactSales[customer_id]),
+			        REMOVEFILTERS(DimDate),
+			        DATESBETWEEN(
+			            DimDate[full_date],
+			            StartDate,
+			            EndDate
+			        ),DimOrderStatus[status_name] = "delivered"
+			    )VAR CYCustomerTable = CALCULATETABLE(
+			        VALUES(FactSales[customer_id]),
+			        REMOVEFILTERS(DimDate),
+			        DATESBETWEEN(
+			            DimDate[full_date],
+			            DATE(SelectedYear , 1, 1),
+			            DATE(SelectedYear  , 9, 30) 
+			        ),DimOrderStatus[status_name] = "delivered"
+			    )VAR CustomerRevenueTable =
+			    ADDCOLUMNS(
+			        PYCustomerTable,
+			        "PY Revenue",
+			        [Previous Year Revenue]
+			    )VAR RankedCustomers =
+			    ADDCOLUMNS(
+			        CustomerRevenueTable,
+			        "Revenue Rank",
+			        RANKX(
+			            CustomerRevenueTable,
+			            [PY Revenue],
+			            ,
+			            DESC,
+			            DENSE
+			        )
+			    )VAR TotalCustomers =
+			    COUNTROWS(RankedCustomers)
+			
+			VAR HighValueLimit =
+			    ROUNDUP(TotalCustomers * 0.20, 0)
+			
+			VAR MediumValueLimit =
+			    ROUNDUP(TotalCustomers * 0.50, 0)                                                                    VAR CustomerSegment = ADDCOLUMNS(RankedCustomers,"SegmentedCustomer",SWITCH(TRUE(),[Revenue Rank]<=HighValueLimit,"High Value", [Revenue Rank]<=MediumValueLimit,"Medium Value","Low Value"))VAR NonReturningCustomers =
+			    EXCEPT(
+			        PYCustomerTable,
+			        CYCustomerTable
+			    )VAR NonReturningSegmentedCustomers =
+			    FILTER(
+			        CustomerSegment,
+			        CONTAINS(
+			            NonReturningCustomers,
+			            FactSales[customer_id],
+			            FactSales[customer_id]
+			        )
+			    )var selectedsegment = VALUES(CustomerValueSegments[Value Segment]) RETURN
+			    IF(
+			        NOT ISBLANK(SelectedYear),
+			        SUMX(
+			            FILTER(
+			                NonReturningSegmentedCustomers,
+			                [SegmentedCustomer]
+			                    IN VALUES(CustomerValueSegments[Value Segment])
+			            ),
+			            [PY Revenue]
+			        )
+			    )
+			```
+		lineageTag: 080d9c81-9658-4391-bfa4-0005da80778a
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Revenue at Risk Contribution %' = DIVIDE([PY Revenue at Risk by Segment],[PY Revenue at Risk])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: ac34aa46-5611-48ee-b148-9ecf43a19049
+
+	measure 'Retention Rate %' = DIVIDE([Retained Customers],[PY Customer Cohort Count])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: d1fb6d1b-41c3-4414-8de9-f02f35637d95
+
+	measure 'Non-Retained Customers by Segment' = ```
+			
+			 
+			VAR SelectedYear =
+			    SELECTEDVALUE(DimDate[year])
+			
+			VAR StartDate =
+			    DATE(SelectedYear - 1, 1, 1)
+			
+			VAR EndDate =
+			    DATE(SelectedYear - 1, 9, 30)                                     VAR PYCustomerTable = CALCULATETABLE(
+			        VALUES(FactSales[customer_id]),
+			        REMOVEFILTERS(DimDate),
+			        DATESBETWEEN(
+			            DimDate[full_date],
+			            StartDate,
+			            EndDate
+			        ),DimOrderStatus[status_name] = "delivered"
+			    )VAR CYCustomerTable = CALCULATETABLE(
+			        VALUES(FactSales[customer_id]),
+			        REMOVEFILTERS(DimDate),
+			        DATESBETWEEN(
+			            DimDate[full_date],
+			            DATE(SelectedYear , 1, 1),
+			            DATE(SelectedYear  , 9, 30) 
+			        ),DimOrderStatus[status_name] = "delivered"
+			    )VAR CustomerRevenueTable =
+			    ADDCOLUMNS(
+			        PYCustomerTable,
+			        "PY Revenue",
+			        [Previous Year Revenue]
+			    )VAR RankedCustomers =
+			    ADDCOLUMNS(
+			        CustomerRevenueTable,
+			        "Revenue Rank",
+			        RANKX(
+			            CustomerRevenueTable,
+			            [PY Revenue],
+			            ,
+			            DESC,
+			            DENSE
+			        )
+			    )VAR TotalCustomers =
+			    COUNTROWS(RankedCustomers)
+			
+			VAR HighValueLimit =
+			    ROUNDUP(TotalCustomers * 0.20, 0)
+			
+			VAR MediumValueLimit =
+			    ROUNDUP(TotalCustomers * 0.50, 0)                                                                    VAR CustomerSegment = ADDCOLUMNS(RankedCustomers,"SegmentedCustomer",SWITCH(TRUE(),[Revenue Rank]<=HighValueLimit,"High Value", [Revenue Rank]<=MediumValueLimit,"Medium Value","Low Value"))VAR NonReturningCustomers =
+			    EXCEPT(
+			        PYCustomerTable,
+			        CYCustomerTable
+			    )VAR NonReturningSegmentedCustomers =
+			    FILTER(
+			        CustomerSegment,
+			        CONTAINS(
+			            NonReturningCustomers,
+			            FactSales[customer_id],
+			            FactSales[customer_id]
+			        )
+			    )var SegmentedCustomer = VALUES(CustomerValueSegments[Value Segment])RETURN
+			    IF(
+			        NOT ISBLANK(SelectedYear),
+			        COUNTROWS(FILTER(NonReturningSegmentedCustomers,[SegmentedCustomer] in SegmentedCustomer)))
+			    
+			```
+		formatString: 0
+		lineageTag: 712e29a7-43ee-4741-ae8b-d8172c1beecf
+
+	column customer_id
+		dataType: int64
+		formatString: 0
+		lineageTag: d86ea786-9a60-4c63-b4ca-0acd6cea7aa2
+		summarizeBy: none
+		sourceColumn: customer_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column customer_name
+		dataType: string
+		lineageTag: 54c376e9-74ae-4587-af9f-c3518d309a73
+		summarizeBy: none
+		sourceColumn: customer_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column date_of_birth
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 856f60bf-a065-4686-8864-692677e8c7e3
+		summarizeBy: none
+		sourceColumn: date_of_birth
+
+		variation Variation
+			isDefault
+			relationship: 941e6cfd-8b89-4477-a9bd-b8ffa3b35d44
+			defaultHierarchy: LocalDateTable_ffb36155-c20d-4d04-8948-01ec8547137f.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column region
+		dataType: string
+		lineageTag: 848f298b-6829-4b8b-b18c-ee01130a6d88
+		summarizeBy: none
+		sourceColumn: region
+
+		annotation SummarizationSetBy = Automatic
+
+	column city
+		dataType: string
+		lineageTag: 03ecb244-bde3-4812-85e5-fbdb88f48bad
+		summarizeBy: none
+		sourceColumn: city
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DimCustomer = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("(local)", "Venesse"),
+				    dbo_DimCustomer = Source{[Schema="dbo",Item="DimCustomer"]}[Data]
+				in
+				    dbo_DimCustomer
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+
