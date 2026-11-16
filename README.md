@@ -81,9 +81,9 @@ Despite improving financial performance, the business remained unprofitable duri
 ## Repository Contents
 
 - **Power BI project:** Report definitions, semantic model, and DAX measures.
-- **SQL scripts:** Data preparation, modeling, validation, and business analysis (to be added).
+- **SQL scripts:** Data preparation, modeling, validation, and business analysis.
 - **Python scripts:** Supporting analytical workflows (to be added).
-- **Dashboard screenshots:** Visual portfolio previews (to be added).
+- **Dashboard screenshots:** Visual portfolio previews.
 
 ## About the Author
 
