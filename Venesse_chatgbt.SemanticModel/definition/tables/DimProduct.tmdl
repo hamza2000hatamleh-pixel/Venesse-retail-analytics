@@ -85,6 +85,7 @@ table DimProduct
 		lineageTag: dcd40495-1dd4-4279-9600-543ec43c3c4c
 
 	measure 'Units Sold' =
+			
 			VAR SelectedYear =
 			    SELECTEDVALUE(DimDate[year])
 			
@@ -98,16 +99,17 @@ table DimProduct
 			IF(
 			    NOT ISBLANK(SelectedYear),
 			    CALCULATE(
-			        COUNT(FactSales[product_id]),
+			        SUM(FactSales[quantity]),
 			        REMOVEFILTERS(DimDate),
 			        DATESBETWEEN(
 			            DimDate[full_date],
 			            StartDate,
 			            EndDate
-			        )
+			        ),
+			        FactSales[status_id] = 6
 			    )
 			)
-		formatString: 0
+		formatString: 0.0
 		lineageTag: 1b1fe450-0af7-4abf-8c3f-03b445d24d55
 
 	measure 'PY Top 10 Products GP' = ```
