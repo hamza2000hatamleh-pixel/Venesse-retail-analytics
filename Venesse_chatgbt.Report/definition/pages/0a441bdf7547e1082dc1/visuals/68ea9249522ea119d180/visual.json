@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "DimMarketingCampaign.campaign_name",
-              "nativeQueryRef": "campaign_name"
+              "nativeQueryRef": "Campaign name",
+              "displayName": "Campaign name"
             },
             {
               "field": {
