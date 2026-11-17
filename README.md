@@ -177,3 +177,4 @@ These are areas for further investigation rather than established causal conclus
 Mechanical Engineering graduate transitioning into Data Analytics and Business Intelligence, with practical experience in SQL Server, Power BI, DAX, Excel, and Python. This project demonstrates an integrated workflow from database analysis and BI visualization to Python reporting and evidence-linked AI commentary.
 
 [LinkedIn](https://www.linkedin.com/in/hamza-hatamleh-37219244a/)
+
